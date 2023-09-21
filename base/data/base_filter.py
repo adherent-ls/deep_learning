@@ -1,0 +1,2 @@
+class BaseFilter(object):
+    pass

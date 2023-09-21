@@ -1,0 +1,17 @@
+from torch.nn import functional as F
+from torch import nn
+
+
+class FCPrediction(nn.Module):
+    def __init__(self, in_channel, n_class):
+        super(FCPrediction, self).__init__()
+
+        n_class = n_class if isinstance(n_class, int) else eval(n_class)
+
+        self.fc = nn.Linear(in_channel, n_class)
+
+    def forward(self, x):
+        pred = self.fc(x)
+        if not self.training:
+            pred = F.softmax(pred, dim=-1)
+        return pred
