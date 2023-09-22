@@ -40,6 +40,13 @@ def build_item(item, key, config, param):
     return result
 
 
-def build_config(config):
+def build_str_compair_config(config):
     config = build_item(config, None, config, config)
+    return config
+
+
+def build_config(path):
+    from utils.yaml_loader import YamlLoader
+    config = yaml.load(open(path, 'rb'), YamlLoader)
+    # yaml.dump(config, open('config.yaml', 'w', encoding='utf-8'), Dumper=yaml.Dumper)
     return config

@@ -1,8 +1,35 @@
-from utils.runner import Runner
-from config_test import build_config
+import argparse
+import os.path
+import random
 
-if __name__ == '__main__':
-    config = build_config('configs/text_recognizer/base_update.yaml')
+import numpy as np
+import torch
+import yaml
+
+from utils.build_config import build_config
+from utils.runner import Runner
+
+
+def parse_args():
+    parse = argparse.ArgumentParser()
+    parse.add_argument('--config', default='configs/text_recognizer/base_update.yaml', help='setting')
+    args = parse.parse_args()
+    return args
+
+
+def main():
+    args = parse_args()
+    manualSeed = 3407
+
+    random.seed(manualSeed)
+    np.random.seed(manualSeed)
+    torch.manual_seed(manualSeed)
+    torch.cuda.manual_seed(manualSeed)
+
+    config = build_config(args.config)
     runner = Runner(config)
     runner.train()
-    print(runner)
+
+
+if __name__ == '__main__':
+    main()
