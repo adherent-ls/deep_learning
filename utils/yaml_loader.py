@@ -538,7 +538,7 @@ class YamlComposer(Composer):
         tag = start_event.tag
         values = []
         while not self.check_event(ParamEndEvent):
-            values.append(self.compose_node(None, None).value)
+            values.append(self.construct_document(self.compose_node(None, None)))
         end_event = self.get_event()
         node = FunctionNode(tag, function, values,
                             start_event.start_mark, end_event.end_mark)
