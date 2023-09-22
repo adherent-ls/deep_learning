@@ -5,9 +5,9 @@ from base.metric.base_post import BaseMetric
 
 
 class TextMetric(BaseMetric):
-    def __init__(self, decode):
+    def __init__(self, decoder):
         super(TextMetric, self).__init__()
-        self.decode = decode
+        self.decoder = decoder
 
         self.acc = 0
         self.normal = 0
@@ -22,8 +22,8 @@ class TextMetric(BaseMetric):
 
     def __call__(self, word_predication, word):
         _, index = torch.max(word_predication, dim=-1)
-        pred_texts = self.decode(index=index)
-        labels = self.decode(index=word)
+        pred_texts = self.decoder(index=index)
+        labels = self.decoder(index=word)
         for text, label in zip(pred_texts, labels):
             if text == label:
                 self.acc += 1
@@ -38,8 +38,8 @@ class TextMetric(BaseMetric):
         t_n = 0
         t = 0
         _, index = torch.max(word_predication, dim=-1)
-        pred_texts = self.decode(index=index)
-        labels = self.decode(index=word)
+        pred_texts = self.decoder(index=index)
+        labels = self.decoder(index=word)
         for text, label in zip(pred_texts, labels):
             if text == label:
                 acc += 1

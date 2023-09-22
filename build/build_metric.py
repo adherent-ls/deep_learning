@@ -1,6 +1,25 @@
 from utils.register import register
 
 
+class MultiDictDecoder(object):
+    def __init__(self, config):
+        self.decoder = self.build_decoder(config)
+
+    def build_decoder(self, config):
+        decoders = []
+        for item in config:
+            decoder_name = item['name']
+            decoder_args = item['args']
+            decoders.append(register.build_from_config(decoder_name, decoder_args, 'decoder'))
+        return decoders
+
+    def __call__(self, index):
+        res = index
+        for item in self.decoder:
+            res = item(res)
+        return res
+
+
 class MultiDictMetric(object):
     def __init__(self, config):
         self.posts = self.build_metric(config['Metric'])
@@ -10,18 +29,13 @@ class MultiDictMetric(object):
         else:
             self.weight = config['weight']
 
-    def build_decoder(self, config):
-        decoder_name = config['name']
-        decoder_args = config['args']
-        return register.build_from_config(decoder_name, decoder_args, 'decoder')
-
     def build_metric(self, config):
         posts = []
         for item in config:
             name = item['name']
             args = item['args']
             if 'decoder' in args:
-                args['decoder'] = self.build_decoder(args['decoder'])
+                args['decoder'] = MultiDictDecoder(args['decoder'])
             posts.append(register.build_from_config(name, args, 'metric'))
         return posts
 
