@@ -25,3 +25,16 @@ class LabelCoder(BaseTransformer):
             index = self.character_map[char_item]
             label.append(index)
         return label
+
+    def decode(self, index):
+        texts = []
+        for item in index:
+            text = ''
+            for single in item:
+                chars = self.characters[int(single)]
+                if chars == self.characters[-1]:  # 结束符号
+                    break
+                if chars != self.characters[0]:  # 开始/空白符号
+                    text += self.characters[int(single)]
+            texts.append(text)
+        return texts

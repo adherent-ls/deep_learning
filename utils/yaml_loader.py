@@ -60,9 +60,8 @@ class FunctionNode(Node):
                  start_mark=None, end_mark=None, style=None):
         self.tag = tag if tag is not None else 'tag:yaml.org,2002:function'
         self.function = function
-        if not isinstance(value, list):
-            value = [value]
-        self.value = eval(function)(*value) if function != '' else eval(*value)
+        self.value = value
+        # self.value = eval(function)(*value) if function != '' else eval(*value)
         self.start_mark = start_mark
         self.end_mark = end_mark
         self.style = style
@@ -527,7 +526,9 @@ class YamlComposer(Composer):
     def compose_function_node(self, anchor):
         event = self.get_event()
         tag = event.tag
-        node = FunctionNode(tag, event.function, event.value,
+        value = [event.value]
+        value = eval(*value)
+        node = FunctionNode(tag, event.function, value,
                             event.start_mark, event.end_mark, style=event.style)
         if anchor is not None:
             self.anchors[anchor] = node
@@ -540,11 +541,24 @@ class YamlComposer(Composer):
         while not self.check_event(ParamEndEvent):
             values.append(self.construct_document(self.compose_node(None, None)))
         end_event = self.get_event()
+
+        values = self.build_python_instance(function, args=values)
         node = FunctionNode(tag, function, values,
                             start_event.start_mark, end_event.end_mark)
         if anchor is not None:
             self.anchors[anchor] = node
         return node
+
+    def build_python_instance(self, suffix, args=None, kwds=None, newobj=False):
+        if not args:
+            args = []
+        if not kwds:
+            kwds = {}
+        cls = self.find_python_name(suffix, 0)
+        if newobj and isinstance(cls, type):
+            return cls.__new__(cls, *args, **kwds)
+        else:
+            return cls(*args, **kwds)
 
 
 class YamlConstructor(Constructor):

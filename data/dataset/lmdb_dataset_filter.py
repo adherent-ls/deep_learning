@@ -6,13 +6,14 @@ import numpy as np
 import six
 from PIL import Image
 import tqdm
-from torch.utils.data import Dataset
+
+from base.data.base_dataset import BaseDataset
 
 
-class LmdbDatasetFilter(Dataset):
+class LmdbDatasetFilter(BaseDataset):
 
     def __init__(self, root, filter=None, is_cache=True, recache=False, cache_path=None):
-
+        super(LmdbDatasetFilter, self).__init__(is_cache=is_cache, recache=recache, cache_path=cache_path)
         self.root = root
         self.env = lmdb.open(root, max_readers=32, readonly=True, lock=False, readahead=False, meminit=False)
         if not self.env:

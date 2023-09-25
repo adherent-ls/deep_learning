@@ -6,6 +6,8 @@ epoch: 100
 device: cpu
 max_length: &max_length 50
 characters: &characters $"['blank'] + [item.strip() for item in open('vocab/radical/word_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"
+radical_characters: !!python/object/apply:eval ["['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"]
+test: $numpy.arange(1,5)
 Transforms: &transforms
   - name: LoadKeys
     args:
@@ -78,7 +80,7 @@ model:
   save_path:
   strict: False
   Modules:
-    - name: ResNetQuery
+    - name: ResNetAdapt
       args:
         input_channel: 3
         output_channel: 512

@@ -8,7 +8,7 @@ class RadicalMapCoder(BaseTransformer):
         super(RadicalMapCoder, self).__init__(**kwargs)
         self.maps = json.load(open(maps_path, encoding='utf-8'))
         labels = {}
-        self.characters = characters
+        self.characters= characters
         for i, line in enumerate(self.characters):
             labels[line] = i
         self.character_map = labels
@@ -38,3 +38,6 @@ class RadicalMapCoder(BaseTransformer):
             radical_items.append(self.character_map[self.characters[-1]])  # 添加结束符号
             label.append(radical_items)
         return label
+
+    def decode(self, index):
+        return index

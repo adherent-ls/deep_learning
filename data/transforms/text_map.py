@@ -1,6 +1,6 @@
-import numpy as np
-
 import json
+
+import numpy as np
 
 from base.data.base_transformer import BaseTransformer
 
@@ -37,6 +37,9 @@ class RadicalMapCoder(object):
             radical_items.append(self.character_map[self.characters[-1]])  # 添加结束符号
             label.append(radical_items)
         return label
+
+    def decode(self, index):
+        return index
 
 
 class RadicalMapCollate(object):

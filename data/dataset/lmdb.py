@@ -7,7 +7,8 @@ import torch
 import numpy as np
 import six
 from PIL import Image
-from torch.utils.data import Dataset
+
+from base.data.base_dataset import BaseDataset
 
 
 class TextLabelBase(object):
@@ -55,9 +56,10 @@ class TextLabelBase(object):
         return texts
 
 
-class LmdbDataset(Dataset):
+class LmdbDataset(BaseDataset):
 
     def __init__(self, root, characters, imgH=32, max_length=50, padding=8):
+        super(LmdbDataset, self).__init__()
         self.label_client = TextLabelBase(characters)
 
         self.imgH = imgH

@@ -4,12 +4,14 @@ import lmdb
 import numpy as np
 import six
 from PIL import Image
-from torch.utils.data import Dataset
+
+from base.data.base_dataset import BaseDataset
 
 
-class LmdbDataset(Dataset):
+class LmdbDataset(BaseDataset):
 
     def __init__(self, root):
+        super(LmdbDataset, self).__init__()
 
         self.root = root
         self.env = lmdb.open(root, max_readers=32, readonly=True, lock=False, readahead=False, meminit=False)

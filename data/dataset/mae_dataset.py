@@ -1,11 +1,13 @@
 import os
 
 import cv2
-from torch.utils.data import Dataset
+
+from base.data.base_dataset import BaseDataset
 
 
-class MAEDataset(Dataset):
+class MAEDataset(BaseDataset):
     def __init__(self, root):
+        super(MAEDataset, self).__init__()
         self.root = root
         self.dirs = os.listdir(self.root)
 

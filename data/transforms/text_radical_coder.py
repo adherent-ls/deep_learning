@@ -31,3 +31,6 @@ class RadicalCoder(BaseTransformer):
                 label.append(index)
             label.append(self.character_map['end'])  # 添加字与字之间的间隔符号
         return label
+
+    def decode(self, index):
+        return index
