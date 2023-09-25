@@ -6,7 +6,7 @@ from base.data.base_transformer import BaseTransformer
 class ZeroMeanNormal(BaseTransformer):
     def __init__(self, scale, mean, std, **kwargs):
         super(ZeroMeanNormal, self).__init__(**kwargs)
-        self.scale = eval(scale) if isinstance(scale, str) else scale
+        self.scale = scale
         shape = (1, 1, 3)
         self.mean = np.array(mean).reshape(shape)
         self.std = np.array(std).reshape(shape)
