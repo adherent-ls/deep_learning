@@ -7,7 +7,10 @@ class OptimizerWithScheduler(object):
     def __init__(self, model: torch.nn.Module, config):
         super(OptimizerWithScheduler, self).__init__()
         self.optimizer = self.build_optimizer(model.parameters(), config['Optimizer'])
-        self.scheduler = self.build_scheduler(self.optimizer, config['Scheduler'])
+        if 'Scheduler' in config:
+            self.scheduler = self.build_scheduler(self.optimizer, config['Scheduler'])
+        else:
+            self.scheduler = None
         self.base_lr = [group['lr'] for group in self.optimizer.param_groups]
 
     def build_optimizer(self, parameters, config):

@@ -16,7 +16,8 @@ class LabelVocabCheckFilter(BaseFilter):
         is_valid = False
         if label is None:
             return is_valid
-        label = label.decode('utf-8')
+        if not isinstance(label, str):
+            label = label.decode('utf-8') 
         if label is None:
             return is_valid
         if self.label_length_limit is not None:

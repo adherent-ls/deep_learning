@@ -8,11 +8,7 @@ class TextAttnEndChar(BaseTransformer):
         super(TextAttnEndChar, self).__init__(**kwargs)
         self.end = end
 
-    def forward(self, labels):
-        new_labels = []
-        for i, label in enumerate(labels):
-            label_index = self.once_encode(label)
-            label_index.append(self.character_map['end'])
-            labels[i] = np.array(label_index)
-            new_labels.append(label + ['end'])
-        return labels, new_labels
+    def forward(self, label):
+        label_index = self.once_encode(label)
+        label_index.append(self.character_map['end'])
+        return label_index

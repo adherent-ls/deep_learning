@@ -6,11 +6,8 @@ class LoadKeys(BaseTransformer):
         super(LoadKeys, self).__init__(**kwargs)
         self.keys = keys
 
-    def __call__(self, args):
+    def __call__(self, datas):
         data = {}
-        for key in self.keys:
-            data[key] = []
-        for item in args:
-            for key, data_item in zip(self.keys, item):
-                data[key].append(data_item)
+        for key, data_item in zip(self.keys, datas):
+            data[key] = data_item
         return data

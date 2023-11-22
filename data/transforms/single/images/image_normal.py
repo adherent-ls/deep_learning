@@ -11,8 +11,6 @@ class ZeroMeanNormal(BaseTransformer):
         self.mean = np.array(mean).reshape(shape)
         self.std = np.array(std).reshape(shape)
 
-    def forward(self, images):
-        for i, image in enumerate(images):
-            image = (image * self.scale - self.mean) / self.std
-            images[i] = image
-        return images
+    def forward(self, image):
+        image = (image * self.scale - self.mean) / self.std
+        return image

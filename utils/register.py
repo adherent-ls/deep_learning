@@ -115,14 +115,10 @@ class Register(object):
         else:
             raise TypeError(
                 f'name must be a str or valid name, but got {type(cls_name)}')
-
-        try:
+        if hasattr(obj_cls, 'initialization'):
+            instance = obj_cls.initialization(obj_cls, **args)
+        else:
             instance = obj_cls(**args)
-        except Exception as e:
-            stack_info = traceback.format_exc()
-            print("Fail to initial class [{}] with error: "
-                  "{} and stack:\n{}".format(cls_name, e, str(stack_info)))
-            raise e
         return instance
 
 

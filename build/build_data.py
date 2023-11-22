@@ -20,6 +20,8 @@ class BuildTransform(object):
     def __call__(self, data):
         for item in self.trans:
             data = item(data)
+            if data is None:
+                return None
         return data
 
 
@@ -36,10 +38,10 @@ class BuildFilter(object):
             trans.append(register.build_from_config(k, v, 'filter'))
         return trans
 
-    def __call__(self, data):
+    def __call__(self, image, label):
         is_valid = True
         for item in self.filter:
-            item_valid = item(data)
+            item_valid = item(image, label)
             is_valid = is_valid and item_valid
         return is_valid
 

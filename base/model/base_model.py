@@ -8,32 +8,26 @@ class BaseModel(nn.Module):
     def __init__(self, ink='images', ouk=None):
         super().__init__()
         self.ink = ink
-        if ouk is None:
+        print(ouk, '-' * 80)
+        if ouk is not None:
             self.ouk = ouk
-
-    @staticmethod
-    def initialization(cls, **kwargs):
-        param = build_param(cls, kwargs)
-        obj = cls(**param)
-
-        super_param = build_param(super(cls, obj), kwargs)
-        super(cls, obj).__init__(**super_param)
-        return obj
+        else:
+            self.ouk = ink
 
     def dict_forward(self, data):
-        if isinstance(self.in_key, str):
-            in_key = [self.in_key]
+        if isinstance(self.ink, str):
+            ink = [self.ink]
         else:
-            in_key = self.in_key
+            ink = self.ink
         xs = []
-        for item in in_key:
+        for item in ink:
             xs.append(data[item])
         y = super(BaseModel, self).__call__(*xs)  # 调用forward函数
-        if isinstance(self.out_key, list):
-            for key, data_item in zip(self.out_key, y):
+        if isinstance(self.ouk, list):
+            for key, data_item in zip(self.ouk, y):
                 data[key] = data_item
         else:
-            data[self.out_key] = y
+            data[self.ouk] = y
         return data
 
     def instance_forward(self, data):

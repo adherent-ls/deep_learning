@@ -2,6 +2,8 @@ import torch.optim
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import StepLR
 
+from utils.build_param import build_param
+
 
 class BaseScheduler(StepLR.__base__):
     def __init__(self, optimizer: Optimizer):
@@ -11,6 +13,14 @@ class BaseScheduler(StepLR.__base__):
         self.base_lrs = [group['initial_lr'] for group in optimizer.param_groups]
         self._last_lr = [group['lr'] for group in self.optimizer.param_groups]
 
+    @staticmethod
+    def initialization(cls, **kwargs):
+        param = build_param(cls, kwargs)
+        obj = cls(**param)
+
+        super_param = build_param(super(cls, obj), kwargs)
+        super(cls, obj).__init__(**super_param)
+        return obj
     def state_dict(self):
         return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
 

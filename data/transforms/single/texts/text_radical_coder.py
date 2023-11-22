@@ -14,12 +14,9 @@ class RadicalCoder(BaseTransformer):
             labels[line] = i
         self.character_map = labels
 
-    def forward(self, labels):
-        new_labels = []
-        for i, label in enumerate(labels):
-            label = self.once_encode(label)
-            new_labels.append(label)
-        return new_labels
+    def forward(self, label):
+        label = self.once_encode(label)
+        return label
 
     def once_encode(self, text):
         label = []

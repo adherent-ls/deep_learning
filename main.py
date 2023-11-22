@@ -12,7 +12,7 @@ from utils.runner import Runner
 
 def parse_args():
     parse = argparse.ArgumentParser()
-    parse.add_argument('--config', default='configs/text_recognizer/base_update.yaml', help='setting')
+    parse.add_argument('--config', default='configs/text_recognizer/ResNetAdapt-Transformer-CTC.yaml', help='setting')
     args = parse.parse_args()
     return args
 

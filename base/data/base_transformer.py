@@ -6,8 +6,10 @@ from utils.build_param import build_param
 class BaseTransformer(object):
     def __init__(self, ink='images', ouk=None):
         self.ink = ink
-        if ouk is None:
+        if ouk is not None:
             self.ouk = ouk
+        else:
+            self.ouk = ink
 
     @staticmethod
     def initialization(cls, **kwargs):
@@ -31,8 +33,7 @@ class BaseTransformer(object):
             xs = []
 
         y = self.forward(*xs)
-
-        if isinstance(self.ouk, list):
+        if isinstance(self.ouk, list) or isinstance(self.ouk, tuple):
             for key, data_item in zip(self.ouk, y):
                 data[key] = data_item
         else:

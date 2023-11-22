@@ -1,12 +1,19 @@
+import inspect
+
+
 def build_param(cls, kwargs):
-    codes = cls.__init__.__code__
-    param_name_list = codes.co_varnames
-    param_num = codes.co_argcount
-    if param_num == len(param_name_list):
-        param = {}
-        for k, v in kwargs.items():
-            if k in param_name_list:
-                param[k] = v
-    else:
-        param = kwargs
+    parameters = inspect.signature(cls.__init__).parameters
+
+    param = {}
+    for param_name, param_obj in parameters.items():
+        if param_name not in kwargs:
+            continue
+        if param_obj.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            param[param_name] = kwargs[param_name]
+        elif param_obj.kind == inspect.Parameter.VAR_POSITIONAL:
+            continue
+        elif param_obj.kind == inspect.Parameter.VAR_KEYWORD:
+            param.update(kwargs)
+        elif param_obj.kind == inspect.Parameter.KEYWORD_ONLY:
+            continue
     return param
