@@ -100,7 +100,7 @@ class TextMap(BaseTransformer):
 
 
 if __name__ == '__main__':
-    from data.transforms.text_label_coder import LabelCoder
+    from data.transforms.single.texts.text_label_coder import LabelCoder
 
     radical_characters = ['blank'] + [item.strip("\n") for item in
                                       open(r"D:\Code\DeepLearning\self\deep_learning_restruct\vocab\radical\usual.txt",

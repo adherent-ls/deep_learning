@@ -4,9 +4,9 @@ from torch.utils.data import SequentialSampler
 from utils.register import register
 
 
-class DataTransform(object):
+class BuildTransform(object):
     def __init__(self, config):
-        super(DataTransform, self).__init__()
+        super(BuildTransform, self).__init__()
         self.trans = self.build_transform(config)
 
     def build_transform(self, config):
@@ -23,13 +23,34 @@ class DataTransform(object):
         return data
 
 
+class BuildFilter(object):
+    def __init__(self, config):
+        super().__init__()
+        self.filter = self.build_filter(config)
+
+    def build_filter(self, config):
+        trans = []
+        for item_config in config:
+            k = item_config['name']
+            v = item_config['args']
+            trans.append(register.build_from_config(k, v, 'filter'))
+        return trans
+
+    def __call__(self, data):
+        is_valid = True
+        for item in self.filter:
+            item_valid = item(data)
+            is_valid = is_valid and item_valid
+        return is_valid
+
+
 class MutilDataLoader(object):
     def __init__(self, config):
         self.shuffle = config['shuffle']
         self.batch_size = config['batch_size']
         self.num_workers = config['num_workers']
         self.datasets = self.build_dataset(config['Dataset'])
-        self.collate_fn = self.build_transform(config['Transforms'])
+        self.collate_fn = BuildTransform(config['Transforms'])
 
         sampler = []
         data = []
@@ -43,25 +64,15 @@ class MutilDataLoader(object):
             np.random.shuffle(self.sampler)
         self.data = data
 
-    def build_transform(self, config):
-        return DataTransform(config)
-
-    def build_filter(self, config):
-        filters = []
-        for filter_item in config:
-            f_k = filter_item['name']
-            f_v = filter_item['args']
-            filter = register.build_from_config(f_k, f_v, 'filter')
-            filters.append(filter)
-        return filters
-
     def build_dataset(self, config):
         datasets = []
         for dataset_item in config:
             k = dataset_item['name']
             v = dataset_item['args']
             if 'filter' in v:
-                v['filter'] = self.build_filter(v['filter'])
+                v['filter'] = BuildFilter(v['filter'])
+            if 'transforms' in v:
+                v['transforms'] = BuildTransform(v['transforms'])
             datasets.append(register.build_from_config(k, v, 'data'))
         return datasets
 
