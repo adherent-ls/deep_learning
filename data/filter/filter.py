@@ -7,8 +7,8 @@ from base.data.base_filter import BaseFilter
 
 
 class LabelVocabCheckFilter(BaseFilter):
-    def __init__(self, label_length_limit=None, characters=None, **kwargs):
-        super(LabelVocabCheckFilter, self).__init__(**kwargs)
+    def __init__(self, label_length_limit=None, characters=None):
+        super(LabelVocabCheckFilter, self).__init__()
         self.label_length_limit = label_length_limit
         self.characters = characters if isinstance(characters, list) else eval(characters)
 
@@ -35,8 +35,8 @@ class LabelVocabCheckFilter(BaseFilter):
 
 
 class BoxCheckFilter(BaseFilter):
-    def __init__(self, length_limit=None, **kwargs):
-        super(BoxCheckFilter, self).__init__(**kwargs)
+    def __init__(self, length_limit=None):
+        super(BoxCheckFilter, self).__init__()
         self.length_limit = length_limit
 
     def __call__(self, image, label):
@@ -51,8 +51,8 @@ class BoxCheckFilter(BaseFilter):
 
 
 class ImageCheckFilter(BaseFilter):
-    def __init__(self, **kwargs):
-        super(ImageCheckFilter, self).__init__(**kwargs)
+    def __init__(self):
+        super(ImageCheckFilter, self).__init__()
 
     def __call__(self, imgbuf, label):
         is_valid = False
