@@ -9,6 +9,9 @@ characters: &characters $"['blank'] + [item.strip() for item in open('vocab/radi
 radical_characters: !!python/object/apply:eval [ "['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']" ]
 test: $numpy.arange(1,5)
 SingleTransforms: &single_transforms
+  - name: LoadKeys
+    args:
+      keys: [ images ,text ]
   - name: ImageBufferDecode
     args:
   - name: Resize
@@ -16,9 +19,10 @@ SingleTransforms: &single_transforms
       max_size: [ -1 ,32 ]
   - name: ZeroMeanNormal
     args:
-      scale: $"1. / 255".
+      scale: $"1. / 255."
       mean: [ 0.485, 0.456, 0.406 ]
       std: [ 0.229, 0.224 ,0.225 ]
+
   - name: ImageReshape
     args:
       permute_indices: [ 0 ,3 ,1 ,2 ]
@@ -29,9 +33,6 @@ SingleTransforms: &single_transforms
       characters: *characters
       ink: text
 BatchTransforms: &batch_transforms
-  - name: LoadKeys
-    args:
-      keys: [ images ,text ]
   - name: ImageCollate
     args:
       padding: 10

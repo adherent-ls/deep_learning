@@ -7,38 +7,47 @@ device: cuda:0
 max_length: &max_length 50
 characters: &characters $"['blank'] + [item.strip() for item in open('vocab/radical/word_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"
 radical_characters: !!python/object/apply:eval ["['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"]
-Transforms: &transforms
+SingleTransforms: &single_transforms
   - name: LoadKeys
     args:
       keys: [ images ,text ]
+  - name: ImageBufferDecode
+    args:
   - name: Resize
     args:
       max_size: [ -1 ,32 ]
-      is_pad: True
-      in_key: [ images ,text ]
-      out_key: [ image_pad ,images ,text ]
   - name: ZeroMeanNormal
     args:
       scale: $"1. / 255."
       mean: [ 0.485, 0.456, 0.406 ]
       std: [ 0.229, 0.224 ,0.225 ]
-  - name: LabelCoder
-    args:
-      characters: *characters
-      in_key: text
-      out_key: text
-  - name: LabelCTCCollate
-    args:
-      max_length: *max_length
-      in_key: text
-      out_key: [ text,lengths ]
+
   - name: ImageReshape
     args:
       permute_indices: [ 0 ,3 ,1 ,2 ]
+  - name: TextStreamDecode
+    args:
+  - name: LabelCoder
+    args:
+      characters: *characters
+      ink: text
+BatchTransforms: &batch_transforms
+  - name: ImageCollate
+    args:
+      padding: 10
+      ink: images
+  - name: LabelAttnCollate
+    args:
+      max_length: *max_length
+      ink: text
+  - name: LabelAttnCollate
+    args:
+      max_length: *max_length
+      ink: text
   - name: KeepKeyTensor
     args:
       keep_data_keys: { images: float32 }
-      keep_label_keys: { text: long, lengths: long }
+      keep_label_keys: { text: long }
 Filter: &filter
   - name: LabelVocabCheckFilter
     args:
@@ -48,60 +57,35 @@ Filter: &filter
     args:
 data:
   train:
-    batch_size: 8
+    batch_size: 4
     shuffle: True
     num_workers: 8
     Dataset:
       - name: LmdbDatasetFilter
         args:
-          root: /home/data/data_old/lmdb/train_ship_rec_data/2023_online_lmdb_1
+          root: E:\senya\data\2023_online\train_data\lmdb\2023_online_lmdb_0
           recache: False
-          cache_path: chinese.npy
           filter: *filter
-
+          transforms: *single_transforms
       - name: LmdbDatasetFilter
         args:
-          root: /home/data/data_old/lmdb/train_ship_rec_data/2023_online_lmdb_2-0
+          root: E:\senya\data\2023_online\train_data\lmdb\2023_online_lmdb_1
           recache: False
-          cache_path: chinese.npy
           filter: *filter
-      - name: LmdbDatasetFilter
-        args:
-          root: /home/data/data_old/lmdb/train_ship_rec_data/ch_street/train
-          recache: False
-          cache_path: chinese.npy
-          filter: *filter
-      - name: LmdbDatasetFilter
-        args:
-          root: /home/data/data_old/lmdb/train_ship_rec_data/411w_train
-          recache: False
-          cache_path: chinese.npy
-          filter: *filter
-    Transforms: *transforms
+          transform: *single_transforms
+    Transforms: *batch_transforms
   val:
-    batch_size: 8
+    batch_size: 4
     shuffle: True
     num_workers: 8
     Dataset:
       - name: LmdbDatasetFilter
         args:
-          root: /home/data/data_old/lmdb/valid_ship_rec_data/2023_online_lmdb_0
+          root: E:\senya\data\2023_online\train_data\lmdb\2023_online_lmdb_2-0
           recache: False
-          cache_path: chinese.npy
           filter: *filter
-      - name: LmdbDatasetFilter
-        args:
-          root: /home/data/data_old/lmdb/valid_ship_rec_data/lmdb
-          recache: False
-          cache_path: chinese.npy
-          filter: *filter
-      - name: LmdbDatasetFilter
-        args:
-          root: /home/data/data_old/lmdb/valid_ship_rec_data/ch_street/val
-          recache: False
-          cache_path: chinese.npy
-          filter: *filter
-    Transforms: *transforms
+          transforms: *single_transforms
+    Transforms: *batch_transforms
 model:
   resume_path:
   save_path: /home/data/workspace/training_models/deep_learning/ResNetAdapt-Transformer-CTC
@@ -124,7 +108,7 @@ model:
       args:
         in_channel: 512
         n_class: $len(*characters)
-        out_key: text_prop
+        ouk: text_prop
 optim:
   Optimizer:
     name: torch.optim.Adam

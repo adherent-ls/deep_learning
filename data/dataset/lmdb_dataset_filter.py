@@ -59,5 +59,4 @@ class LmdbDatasetFilter(BaseDataset):
         img_key = f'image-{in_indices}'.encode()
         imgbuf = self.txn.get(img_key)
 
-        image, label = self.transforms(imgbuf, label)
-        return image, label
+        return self.transforms(imgbuf, label)

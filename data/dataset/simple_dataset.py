@@ -38,5 +38,4 @@ class SimpleDataset(BaseDataset):
         assert index <= len(self), 'index range error'
         image_name, label = self.data[index]
         image = cv2.imread(os.path.join(os.path.join(self.image_root, image_name)))
-        image, label = self.transforms(image, label)
-        return image, label
+        return self.transforms(image, label)

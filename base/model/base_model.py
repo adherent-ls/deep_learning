@@ -5,10 +5,11 @@ from utils.build_param import build_param
 
 
 class BaseModel(nn.Module):
-    def __init__(self, in_key='images', out_key='images'):
-        super(BaseModel, self).__init__()
-        self.in_key = in_key
-        self.out_key = out_key
+    def __init__(self, ink='images', ouk=None):
+        super().__init__()
+        self.ink = ink
+        if ouk is None:
+            self.ouk = ouk
 
     @staticmethod
     def initialization(cls, **kwargs):
