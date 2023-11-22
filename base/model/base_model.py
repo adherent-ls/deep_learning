@@ -8,7 +8,6 @@ class BaseModel(nn.Module):
     def __init__(self, ink='images', ouk=None):
         super().__init__()
         self.ink = ink
-        print(ouk, '-' * 80)
         if ouk is not None:
             self.ouk = ouk
         else:
