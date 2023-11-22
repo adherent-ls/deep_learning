@@ -25,7 +25,7 @@ class LmdbDatasetFilter(BaseDataset):
         if self.cache_path is None:
             cache_path = os.path.join(root, 'cache.npy')
         else:
-            cache_path = os.path.join(root, self.cache_path)
+            cache_path = self.cache_path
         if self.is_cache and os.path.exists(cache_path) and not self.recache:
             indices = np.load(cache_path)
         else:
