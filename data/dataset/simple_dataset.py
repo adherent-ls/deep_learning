@@ -15,10 +15,10 @@ class SimpleDataset(BaseDataset):
         lines = open(self.label_file).readlines()
 
         data = []
-        if self.cache_path is None:
+        if self.cache_file is None:
             cache_path = os.path.join(os.path.dirname(self.label_file), 'cache.npy')
         else:
-            cache_path = self.cache_path
+            cache_path = os.path.join(os.path.dirname(self.label_file), self.cache_file)
         if self.is_cache and os.path.exists(cache_path) and not self.recache:
             data = np.load(cache_path)
         else:

@@ -8,11 +8,11 @@ from utils.build_param import build_param
 
 
 class BaseDataset(Dataset):
-    def __init__(self, transforms=None, is_cache=True, recache=False, cache_path=None):
+    def __init__(self, transforms=None, is_cache=True, recache=False, cache_file=None):
         super(BaseDataset, self).__init__()
         self.is_cache = is_cache
         self.recache = recache
-        self.cache_path = cache_path
+        self.cache_file = cache_file
         self.transforms = transforms
 
     @staticmethod

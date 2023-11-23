@@ -33,6 +33,9 @@ class BaseTransformer(object):
             xs = []
 
         y = self.forward(*xs)
+        if y is None:
+            return None
+
         if isinstance(self.ouk, list) or isinstance(self.ouk, tuple):
             for key, data_item in zip(self.ouk, y):
                 data[key] = data_item
