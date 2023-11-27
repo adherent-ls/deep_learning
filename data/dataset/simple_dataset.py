@@ -12,7 +12,7 @@ class SimpleDataset(BaseDataset):
         super().__init__()
         self.image_root = image_root
         self.label_file = label_file
-        lines = open(self.label_file).readlines()
+        lines = open(self.label_file, encoding='utf-8').readlines()
 
         data = []
         if self.cache_file is None:

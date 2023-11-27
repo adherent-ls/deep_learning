@@ -2,10 +2,11 @@ import torch.optim
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import StepLR
 
+from base.base.base_instance_call import BaseInstanceCall
 from utils.build_param import build_param
 
 
-class BaseScheduler(StepLR.__base__):
+class BaseScheduler(StepLR.__base__, BaseInstanceCall):
     def __init__(self, optimizer: Optimizer):
         self.optimizer = optimizer
         for group in optimizer.param_groups:
@@ -13,14 +14,6 @@ class BaseScheduler(StepLR.__base__):
         self.base_lrs = [group['initial_lr'] for group in optimizer.param_groups]
         self._last_lr = [group['lr'] for group in self.optimizer.param_groups]
 
-    @staticmethod
-    def initialization(cls, **kwargs):
-        param = build_param(cls, kwargs)
-        obj = cls(**param)
-
-        super_param = build_param(super(cls, obj), kwargs)
-        super(cls, obj).__init__(**super_param)
-        return obj
     def state_dict(self):
         return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
 
@@ -49,5 +42,5 @@ class BaseScheduler(StepLR.__base__):
 if __name__ == '__main__':
     model = torch.nn.Conv2d(3, 3, 3)
     adam = torch.optim.Adam(model.parameters(), lr=0.02)
-    base = BaseScheduler(adam)
+    base = BaseScheduler.initialization(BaseScheduler, **{'optimizer': adam})
     print(base)

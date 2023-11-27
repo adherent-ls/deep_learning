@@ -49,13 +49,13 @@ class Model(nn.Module):
         resume_path = self.resume_path
         if resume_path is None:
             print('resume_path is None')
-            return {'step': 0, 'value': 0}
+            return None
         if not os.path.exists(resume_path):
             print('not os.path.exists(resume_path)', resume_path)
-            return {'step': 0, 'value': 0}
+            return None
         if resume_path == '':
             print('resume_path == ""')
-            return {'step': 0, 'value': 0}
+            return None
         print(resume_path)
         config = torch.load(resume_path, map_location='cpu')
         state_dict = config['model']

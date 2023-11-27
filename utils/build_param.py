@@ -1,8 +1,9 @@
 import inspect
 
 
-def build_param(cls, kwargs):
-    parameters = inspect.signature(cls.__init__).parameters
+def build_param(cls, function_name, kwargs):
+    func = getattr(cls, function_name)
+    parameters = inspect.signature(func).parameters
 
     param = {}
     for param_name, param_obj in parameters.items():

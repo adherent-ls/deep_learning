@@ -60,8 +60,8 @@ data:
     Dataset:
       - name: SimpleDataset
         args:
-          image_root: /home/data/data_old/word/images
-          label_file: /home/data/data_old/word/labels
+          image_root: D:\Work\Code\word\images
+          label_file: D:\Work\Code\word\labels
           recache: False
           filter: *filter
           transforms: *single_transforms
@@ -73,8 +73,8 @@ data:
     Dataset:
       - name: SimpleDataset
         args:
-          image_root: /home/data/data_old/word/images
-          label_file: /home/data/data_old/word/labels
+          image_root: D:\Work\Code\word\images
+          label_file: D:\Work\Code\word\labels
           recache: False
           filter: *filter
           transforms: *single_transforms

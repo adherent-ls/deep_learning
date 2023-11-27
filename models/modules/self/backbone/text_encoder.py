@@ -21,8 +21,9 @@ class QuickGELU(nn.Module):
 
 
 class ResidualAttentionBlock(nn.Module):
-    def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
+    def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None, max_length=1000):
         super().__init__()
+        self.positional_embedding = nn.Parameter(torch.rand(max_length, d_model))
 
         self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
@@ -39,6 +40,8 @@ class ResidualAttentionBlock(nn.Module):
         return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
 
     def forward(self, x: torch.Tensor):
+        b, n, c = x.shape
+        x = x + self.positional_embedding[None, :n]
         x = x + self.attention(self.ln_1(x))
         x = x + self.mlp(self.ln_2(x))
         return x
@@ -65,7 +68,7 @@ class TextEncoderTransformer(BaseModel):
             width=transformer_width,
             layers=transformer_layers,
             heads=transformer_heads,
-#             attn_mask=self.build_attention_mask()
+            #             attn_mask=self.build_attention_mask()
         )
 
         self.vocab_size = vocab_size

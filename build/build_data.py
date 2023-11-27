@@ -20,8 +20,6 @@ class BuildTransform(object):
     def __call__(self, data):
         for item in self.trans:
             data = item(data)
-            if data is None:
-                return None
         return data
 
 

@@ -29,7 +29,8 @@ class Runner(object):
         show_step = self.config['show_step']
         inference_step = self.config['inference_step']
         grad_clip = self.config['grad_clip']
-        best_metric = -1000
+
+        best_metric = None
         step = 0
 
         self.model.to(device)
