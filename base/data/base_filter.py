@@ -1,6 +1,5 @@
-from base.base.base_dict_call import BaseDictCall
+from base.base.base_instance_call import BaseInstanceCall
 
 
-class BaseFilter(BaseDictCall):
+class BaseFilter(BaseInstanceCall):
     pass
-

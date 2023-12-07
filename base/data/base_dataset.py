@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset
 
 from base.base.base_dict_call import BaseDictCall
@@ -10,3 +12,9 @@ class BaseDataset(Dataset, BaseDictCall):
         self.recache = recache
         self.cache_file = cache_file
         self.transforms = transforms
+
+    def save_cache(self, data_index):
+        raise NotImplemented
+
+    def get_cache(self):
+        raise NotImplemented

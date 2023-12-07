@@ -1,3 +1,4 @@
+import copy
 import types
 
 import yaml
@@ -500,7 +501,7 @@ class YamlComposer(Composer):
             if anchor not in self.anchors:
                 raise ComposerError(None, None, "found undefined alias %r"
                                     % anchor, event.start_mark)
-            return self.anchors[anchor]
+            return copy.deepcopy(self.anchors[anchor])
         event = self.peek_event()
         anchor = event.anchor
         if anchor is not None:

@@ -1,5 +1,8 @@
+import os
+
 import numpy as np
 from torch.utils.data import SequentialSampler
+from tqdm import tqdm
 
 from utils.register import register
 
@@ -33,6 +36,8 @@ class BuildFilter(object):
         for item_config in config:
             k = item_config['name']
             v = item_config['args']
+            if v is not None and 'filter' in v:
+                v['filter'] = BuildFilter(v['filter'])
             trans.append(register.build_from_config(k, v, 'filter'))
         return trans
 

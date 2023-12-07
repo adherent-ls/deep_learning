@@ -44,7 +44,8 @@ class Register(object):
         self.load_modules(root, exact)
 
     def import_module(self, package_name):
-        module = importlib.import_module(f'{package_name}'.replace('.py', ''))
+        import_file = f'{package_name}'.replace('.py', '')
+        module = importlib.import_module(import_file)
         dict_items = module.__dict__
         for k, v in dict_items.items():
             if k.startswith('__'):
@@ -54,7 +55,13 @@ class Register(object):
                 t = t.__base__
                 for group_name, group_flag in self.need_register.items():
                     if t is group_flag:
-                        self.register[group_name][k] = v
+                        name = f'{import_file}.{k}'
+                        if name not in self.register[group_name]:
+                            self.register[group_name][name] = []
+                        self.register[group_name][name].append(v)
+                        if k not in self.register[group_name]:
+                            self.register[group_name][k] = []
+                        self.register[group_name][k].append(v)
 
     def load_modules(self, root, exact=()):
         for item in root:
@@ -112,6 +119,9 @@ class Register(object):
                     raise FileNotFoundError(f'not found {cls_name} in register[{register_group_name}]')
             else:
                 obj_cls = self.register[register_group_name][cls_name]
+                if len(obj_cls) > 1:
+                    raise Exception(f'{cls_name} more than 1 in {register_group_name}, they are:{obj_cls}')
+                obj_cls = obj_cls[0]
         else:
             raise TypeError(
                 f'name must be a str or valid name, but got {type(cls_name)}')

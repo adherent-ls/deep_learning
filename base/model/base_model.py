@@ -6,19 +6,5 @@ from utils.build_param import build_param
 
 
 class BaseModel(nn.Module, BaseDictCall):
-    pass
-
-
-class Test(BaseModel):
-    def __init__(self):
-        super().__init__()
-        self.conv = nn.Linear(128, 128)
-
-
-def main():
-    c = Test.initialization(Test, **{'ink': 'i'})
-    print(c)
-
-
-if __name__ == '__main__':
-    main()
+    def __call__(self, *args, **kwargs):
+        return super(nn.Module, self).__call__(*args, **kwargs)

@@ -80,10 +80,8 @@ class CNNEncoder(BaseModel):
 
         self.module_list = modules
 
-    def forward(self, data):
-        x = data[self.in_key]
+    def forward(self, x):
         y = x
         for item in self.module_list:
             y = item(y)
-        data[self.out_key] = y
-        return data
+        return y

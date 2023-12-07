@@ -5,7 +5,7 @@ class BaseInstanceCall(Base):
     def set(self):
         pass
 
-    def __call__(self, data):
+    def __call__(self, *data):
         y = self.forward(*data)
         return y
 

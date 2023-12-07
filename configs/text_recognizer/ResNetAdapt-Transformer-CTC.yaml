@@ -3,7 +3,7 @@ show_step: 10
 grad_clip: 1.0
 inference_step: 10000
 epoch: 100
-device: cuda:0
+device: cpu
 max_length: &max_length 50
 characters: &characters $"['blank'] + [item.strip() for item in open('vocab/radical/word_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"
 radical_characters: !!python/object/apply:eval ["['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']"]
@@ -46,12 +46,16 @@ BatchTransforms: &batch_transforms
       keep_data_keys: { images: float32 }
       keep_label_keys: { text: long, lengths: long }
 Filter: &filter
-  - name: LabelVocabCheckFilter
+  - name: TextDataFilter
     args:
-      label_length_limit: *max_length  # 一般和max_length相同或者max_length - 1
-      characters: *characters
-  - name: ImageCheckFilter
-    args:
+      recache: False
+      filter:
+        - name: LabelVocabCheckFilter
+          args:
+            label_length_limit: *max_length  # 一般和max_length相同或者max_length - 1
+            characters: *characters
+        - name: ImageCheckFilter
+          args:
 data:
   train:
     batch_size: 64
@@ -62,7 +66,6 @@ data:
         args:
           image_root: D:\Work\Code\word\images
           label_file: D:\Work\Code\word\labels
-          recache: False
           filter: *filter
           transforms: *single_transforms
     Transforms: *batch_transforms
@@ -75,7 +78,6 @@ data:
         args:
           image_root: D:\Work\Code\word\images
           label_file: D:\Work\Code\word\labels
-          recache: False
           filter: *filter
           transforms: *single_transforms
     Transforms: *batch_transforms
@@ -84,10 +86,9 @@ model:
   save_path: /home/data/workspace/training_models/deep_learning/ResNetAdapt-Transformer-CTC
   strict: False
   Modules:
-    - name: ResNetAdapt
+    - name: models.modules.paddle.rec.rec_resnet_vd.ResNet
       args:
-        input_channel: 3
-        output_channel: 512
+        in_channels: 3
     - name: Reshape
       args:
         transpose_index: [ 0 ,3 ,2 ,1 ]

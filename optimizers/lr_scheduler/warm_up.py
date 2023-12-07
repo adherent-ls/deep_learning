@@ -33,6 +33,9 @@ class Warmup(BaseScheduler):
         lr = lr + self.min_lr
         return lr
 
+    def get_last_lr(self):
+        return self.lr
+
     def step(self, epoch=None) -> None:
         if epoch is None:
             self.n += 1

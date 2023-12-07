@@ -223,9 +223,9 @@ def train():
 
     model = Model(n_class=len(characters)).to(device)
     loss_fn = CTCLossProxy(zero_infinity=True)
-    optim_obj = torch.optim.Adam(
+    optim_obj = torch.optim.SGD(
         params=model.parameters(),
-        lr=0.0001
+        lr=0.0001,
     )
     sch_obj = Warmup(optim_obj)
     optim = OptimizerWithScheduler(optim_obj, sch_obj)
@@ -248,6 +248,7 @@ def train():
             preds = model(input_data)
 
             loss = loss_fn(preds['text_prop'], [labels['text'], labels['lengths']])
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optim.zero_grad()
             loss.backward()
             optim.step()

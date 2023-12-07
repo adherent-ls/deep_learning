@@ -39,10 +39,10 @@ class BasicBlock(nn.Module):
         return out
 
 
-class ResNetAdapt(BaseModel):
+class ResNet(BaseModel):
 
     def __init__(self, input_channel, output_channel, block=BasicBlock, layers=(1, 2, 5, 3), **kwargs):
-        super(ResNetAdapt, self).__init__(**kwargs)
+        super(ResNet, self).__init__(**kwargs)
 
         self.output_channel_block = [int(output_channel / 4), int(output_channel / 2), output_channel, output_channel]
 

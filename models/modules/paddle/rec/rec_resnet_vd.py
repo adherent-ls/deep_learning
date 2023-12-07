@@ -20,6 +20,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+__all__ = ["ResNet"]
+
 from base.model.base_model import BaseModel
 
 
@@ -46,9 +48,16 @@ class ConvBNLayer(nn.Module):
             stride=1 if is_vd_mode else stride,
             padding=(kernel_size - 1) // 2,
             groups=groups,
-            bias=False)
-        self._batch_norm = nn.BatchNorm1d(
-            out_channels)
+            bias=False
+        )
+        if act is not None:
+            self._batch_norm = nn.Sequential(
+                nn.BatchNorm2d(out_channels),
+                nn.ReLU()
+            )
+        else:
+            self._batch_norm = nn.BatchNorm2d(
+                out_channels)
 
     def forward(self, inputs):
         if self.is_vd_mode:
@@ -162,9 +171,9 @@ class BasicBlock(nn.Module):
         return y
 
 
-class PaddleResNet(BaseModel):
+class ResNet(BaseModel):
     def __init__(self, in_channels=3, layers=50, **kwargs):
-        super(PaddleResNet, self).__init__()
+        super(ResNet, self).__init__()
 
         self.layers = layers
         supported_layers = [18, 34, 50, 101, 152, 200]
@@ -183,7 +192,7 @@ class PaddleResNet(BaseModel):
         elif layers == 200:
             depth = [3, 12, 48, 3]
         else:
-            depth = []
+            raise Exception
         num_channels = [64, 256, 512,
                         1024] if layers >= 50 else [64, 64, 128, 256]
         num_filters = [64, 128, 256, 512]
@@ -211,7 +220,7 @@ class PaddleResNet(BaseModel):
             name="conv1_3")
         self.pool2d_max = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.block_list = []
+        self.block_list = nn.ModuleList()
         if layers >= 50:
             for block in range(len(depth)):
                 shortcut = False
@@ -228,7 +237,7 @@ class PaddleResNet(BaseModel):
                         stride = (2, 1)
                     else:
                         stride = (1, 1)
-                    bottleneck_block = self.add_sublayer(
+                    self.add_module(
                         'bb_%d_%d' % (block, i),
                         BottleneckBlock(
                             in_channels=num_channels[block]
@@ -239,7 +248,7 @@ class PaddleResNet(BaseModel):
                             if_first=block == i == 0,
                             name=conv_name))
                     shortcut = True
-                    self.block_list.append(bottleneck_block)
+                    self.block_list.append(self.get_submodule('bb_%d_%d' % (block, i)))
                 self.out_channels = num_filters[block] * 4
         else:
             for block in range(len(depth)):
@@ -251,7 +260,7 @@ class PaddleResNet(BaseModel):
                     else:
                         stride = (1, 1)
 
-                    basic_block = self.add_sublayer(
+                    self.add_module(
                         'bb_%d_%d' % (block, i),
                         BasicBlock(
                             in_channels=num_channels[block]
@@ -262,7 +271,7 @@ class PaddleResNet(BaseModel):
                             if_first=block == i == 0,
                             name=conv_name))
                     shortcut = True
-                    self.block_list.append(basic_block)
+                    self.block_list.append(self.get_submodule('bb_%d_%d' % (block, i)))
                 self.out_channels = num_filters[block]
         self.out_pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
 
