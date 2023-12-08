@@ -1,4 +1,3 @@
-
 import numpy as np
 import six
 from PIL import Image
@@ -17,20 +16,28 @@ class LabelVocabCheckFilter(BaseFilter):
         if label is None:
             return is_valid
         if not isinstance(label, str):
-            label = label.decode('utf-8') 
+            label = label.decode('utf-8')
         if label is None:
             return is_valid
         if self.label_length_limit is not None:
             if len(label) >= self.label_length_limit:
                 return is_valid
-        if self.label_length_limit is not None:
-            out_vocab = False
-            for item in label:
-                if item not in self.characters:
-                    out_vocab = True
-                    break
-            if out_vocab:
-                return is_valid
+        out_vocab = False
+        for item in label:
+            if item not in self.characters:
+                out_vocab = True
+                break
+        if out_vocab:
+            return is_valid
+        # in_vocab = False
+        # for item in label:
+        #     if item in self.characters:
+        #         in_vocab = True
+        #         break
+        # if not in_vocab:
+        #     return is_valid
+        if len(label) >= self.label_length_limit:
+            return is_valid
         is_valid = True
         return is_valid
 

@@ -1,0 +1,4 @@
+model:
+  - name: MobileNetV3
+    args:
+  - name: AdaptiveAvgPool2d

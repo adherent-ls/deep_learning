@@ -4,9 +4,7 @@ import random
 
 import numpy as np
 import torch
-import yaml
 
-from utils.build_config import build_config
 from utils.runner import Runner
 
 
@@ -26,8 +24,7 @@ def main():
     torch.manual_seed(manualSeed)
     torch.cuda.manual_seed(manualSeed)
 
-    config = build_config(args.config)
-    runner = Runner(config)
+    runner = Runner()
     runner.train()
 
 
