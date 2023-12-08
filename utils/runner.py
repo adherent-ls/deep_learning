@@ -151,6 +151,7 @@ class Runner(object):
                 if (iteration + 1) % 100 == 0:
                     print(iteration + 1, lr, loss_avg.val(), time.time() - st, self.metric.get_metric())
                     self.metric.reset()
+                    loss_avg.reset()
                     st = time.time()
                 if (iteration + 1) % 2000 == 0:
                     self.model.eval()
@@ -159,7 +160,6 @@ class Runner(object):
                         print(valid_loss, norm_ED, infer_time, length_of_data)
                     self.model.save_model('last', norm_ED)
                     self.model.train()
-                    loss_avg.reset()
                 iteration += 1
 
     def validation(self):

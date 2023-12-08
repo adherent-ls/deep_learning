@@ -28,8 +28,6 @@ class Warmup(object):
             lr = cosine_decay(
                 self.n - self.warm, self.max_step - self.warm, lr, self.min_lr
             )
-
-        lr = lr + self.min_lr
         return lr
 
     def get_last_lr(self):

@@ -16,7 +16,8 @@ class CrossEntropyLossProxy(object):
 class CTCLossProxy(object):
     def __init__(self, zero_infinity=False, use_focal_loss=False):
         super(CTCLossProxy, self).__init__()
-        self.ctc_fn = CTCLoss(blank=0, zero_infinity=zero_infinity, reduction='none')
+        # self.ctc_fn = CTCLoss(blank=0, zero_infinity=zero_infinity, reduction='none')
+        self.ctc_fn = CTCLoss(blank=0, zero_infinity=zero_infinity)
         self.use_focal_loss = use_focal_loss
 
     def __call__(self, preds, labels):
@@ -29,13 +30,12 @@ class CTCLossProxy(object):
         preds = preds.log_softmax(2)
         preds = preds.permute(1, 0, 2)
         loss = self.ctc_fn(preds, text, preds_size, length)
-
-        if self.use_focal_loss:
-            weight = torch.exp(-loss)
-            weight = torch.subtract(torch.tensor([1.0]), weight)
-            weight = torch.square(weight)
-            loss = torch.multiply(loss, weight)
-        loss = loss.mean()
+        # if self.use_focal_loss:
+        #     weight = torch.exp(-loss)
+        #     weight = torch.subtract(torch.tensor([1.0]), weight)
+        #     weight = torch.square(weight)
+        #     loss = torch.multiply(loss, weight)
+        # loss = loss.mean()
         return loss
 
 
