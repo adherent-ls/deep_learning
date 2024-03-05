@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 
+from base.module.base_scheduler import BaseScheduler
+
 
 def cosine_decay(global_step, max_steps, initial_value, end_value):
     global_step = min(global_step, max_steps)
@@ -9,16 +11,16 @@ def cosine_decay(global_step, max_steps, initial_value, end_value):
     return (initial_value - end_value) * cosine_decay_value + end_value
 
 
-class Warmup(object):
-    def __init__(self, optimizer, warm=0, step=0, min_lr=1e-6, max_step=1e7) -> None:
+class Warmup(BaseScheduler):
+    def __init__(self, base_lr, warm=0, step=0, min_lr=1e-6, max_step=1e7) -> None:
         super(Warmup, self).__init__()
-        self.optimizer = optimizer
-        self.base_lr = [group['lr'] for group in optimizer.param_groups]
+        self.base_lr = base_lr
         self.warm = warm
         self.n = step
         self.min_lr = min_lr
-        self.lr = self.base_lr
         self.max_step = max_step
+
+        self.curr_lr = self.base_lr
 
     def decay(self, lr) -> float:
         if self.n <= self.warm:
@@ -31,13 +33,13 @@ class Warmup(object):
         return lr
 
     def get_last_lr(self):
-        return self.lr
+        return self.curr_lr
 
-    def step(self, epoch=None) -> None:
+    def step(self, epoch=None):
         if epoch is None:
             self.n += 1
         else:
             self.n = epoch
-        self.lr = [self.decay(lr) for lr in self.base_lr]
-        for i, group in enumerate(self.optimizer.param_groups):
-            group['lr'] = self.lr[i]
+        lr = [self.decay(lr) for lr in self.base_lr]
+        self.curr_lr = lr
+        return lr

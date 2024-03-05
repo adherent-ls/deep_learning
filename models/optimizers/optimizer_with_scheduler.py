@@ -10,12 +10,14 @@ class OptimizerWithScheduler(object):
 
     @torch.no_grad()
     def step(self, closure=None):
-        self.optimizer.step(closure)
         if self.scheduler is not None:
             self.scheduler.step()
             lr = self.scheduler.get_last_lr()
+            for i, group in enumerate(self.optimizer.param_groups):
+                group['lr'] = lr[i]
         else:
             lr = self.base_lr
+        self.optimizer.step(closure)
         return lr
 
     def zero_grad(self, set_to_none: bool = False):

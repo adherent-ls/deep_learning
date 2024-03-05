@@ -1,0 +1,106 @@
+max_length: &max_length 25
+characters: &characters !!python/object/apply:eval [ "['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']" ]
+num_class: &num_class !!python/object/apply:len [ *characters ]
+epoch: 100
+
+filters: &filter
+  - name: LmdbImageFilter
+    args:
+  - name: LmdbOutVocabFilter
+    args:
+      characters: *characters
+      max_length: *max_length
+transforms: &transforms
+  - name: LmdbImageDecode
+    args:
+  - name: ImagePilToNP
+    args:
+  - name: ImageResizeNormal
+    args:
+      image_shape: [ 3, 32, 256 ]
+  - name: LmdbStreamDecode
+    args:
+  - name: TextEncode
+    args:
+      characters: *characters
+collate: &collate
+  - name: BatchSplit
+    args:
+  - name: ImageCollate
+    args:
+  - name: LabelCollate
+    args:
+      max_length: *max_length
+  - name: NPToTensor
+    args:
+
+data:
+  Train:
+    root: &train_root /home/data/data_old/MJSynth
+    collate: *collate
+    batch_size: 32
+    Dataset:
+      - name: LmdbDataset
+        args:
+          root: *train_root
+    Filter:
+      root: *train_root
+      filters: *filter
+      recache: False
+    Transform:
+      transforms: *transforms
+  Eval:
+    root: &eval_root /home/data/data_old/MJSynth
+    collate: *collate
+    batch_size: 32
+    Dataset:
+      - name: LmdbDataset
+        args:
+          root: *eval_root
+    Filter:
+      root: *eval_root
+      filters: *filter
+      recache: False
+    Transform:
+      transforms: *transforms
+model:
+  save_path:
+  modules:
+    - name: models.modules.backbone.cnn.res_adapt.ResNet
+      args:
+        input_channel: 3
+        output_channel: 512
+    - name: torch.nn.AdaptiveAvgPool2d
+      args:
+        output_size: [ 1, -1 ]
+    - name: models.modules.neck.rnn.bilstm_paddle.EncoderWithRNN
+      args:
+        in_channels: 512
+        hidden_size: 256
+    - name: models.modules.head.text_recognize.ctc.CTC
+      args:
+        in_channel: 512
+        num_class: *num_class
+optimizer:
+  optim:
+    name: torch.optim.Adam
+    args:
+      lr: 0.0005
+      betas: [ 0.9, 0.99 ]
+      weight_decay: 0.00004
+  scheduler:
+    name: Warmup
+    args:
+      warm: 10000
+criterion:
+  name: CTCLossProxy
+  args:
+    zero_infinity: True
+    use_focal_loss: False
+metric:
+  name: RecMetric
+  args:
+decoder:
+  name: TextDecoder
+  args:
+    characters: *characters

@@ -1,8 +1,9 @@
 import Levenshtein
-import torch
+
+from base.metric.base_metric import BaseMetric
 
 
-class TextMetric(object):
+class TextMetric(BaseMetric):
     def __init__(self):
         super(TextMetric, self).__init__()
         self.acc = 0
