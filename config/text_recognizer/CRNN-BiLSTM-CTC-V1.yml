@@ -2,6 +2,8 @@ max_length: &max_length 25
 characters: &characters !!python/object/apply:eval [ "['blank'] + [item.strip() for item in open('vocab/radical/radical_v2.txt', 'r', encoding='utf-8').readlines()] + ['end']" ]
 num_class: &num_class !!python/object/apply:len [ *characters ]
 epoch: 100
+save_path: &save_path /home/data/workspace/training_models/deep_learning/deep_learning_check_v2
+batch_size: &batch_size 32
 
 filters: &filter
   - name: LmdbImageFilter
@@ -38,7 +40,7 @@ data:
   Train:
     root: &train_root /home/data/data_old/MJSynth
     collate: *collate
-    batch_size: 32
+    batch_size: *batch_size
     Dataset:
       - name: LmdbDataset
         args:
@@ -52,7 +54,7 @@ data:
   Eval:
     root: &eval_root /home/data/data_old/MJSynth
     collate: *collate
-    batch_size: 32
+    batch_size: *batch_size
     Dataset:
       - name: LmdbDataset
         args:
@@ -64,7 +66,7 @@ data:
     Transform:
       transforms: *transforms
 model:
-  save_path:
+  save_path: *save_path
   modules:
     - name: models.modules.backbone.cnn.res_adapt.ResNet
       args:
@@ -72,7 +74,10 @@ model:
         output_channel: 512
     - name: torch.nn.AdaptiveAvgPool2d
       args:
-        output_size: [ 1, -1 ]
+        output_size: [ 1, !!python/object/apply:eval [ "None" ] ]
+    - name: Reshape
+      args:
+        shape: [ *batch_size, 512 ,-1 ]
     - name: models.modules.neck.rnn.bilstm_paddle.EncoderWithRNN
       args:
         in_channels: 512

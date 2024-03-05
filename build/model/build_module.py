@@ -49,3 +49,6 @@ class BuildModule(object):
         self.modules.load_state_dict(model_state, strict=strict)
 
         return metric
+
+    def parameters(self):
+        return self.modules.parameters()
