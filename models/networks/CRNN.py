@@ -29,12 +29,18 @@ class CRNN(nn.Module):
     def __init__(self, input_channel, mid_channel, output_channel, num_class, save_path):
         super(CRNN, self).__init__()
         self.save_path = save_path
+        self.FeatureExtraction = ResNet(input_channel, mid_channel)
+        self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((1, None))  # Transform final (imgH/16-1) -> 1
 
-        self.Extraction = Extraction(input_channel, mid_channel, output_channel)
+        self.SequenceModeling = EncoderWithRNN(mid_channel, output_channel // 2)
+        # self.Extraction = Extraction(input_channel, mid_channel, output_channel)
         self.Prediction = CTC(output_channel, num_class)
 
     def forward(self, input):
-        contextual_feature = self.Extraction(input)
+        visual_feature = self.FeatureExtraction(input)
+        visual_feature = self.AdaptiveAvgPool(visual_feature)
+        visual_feature = visual_feature.squeeze(2).permute(0, 2, 1)  # [b, c, h=1, w] -> [b, c, w] -> [b, w, c]
+        contextual_feature = self.SequenceModeling(visual_feature)
         prediction = self.Prediction(contextual_feature.contiguous())
         return prediction
 

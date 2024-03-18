@@ -1,3 +1,4 @@
+import math
 import os.path
 
 import cv2
@@ -62,4 +63,10 @@ def te():
 
 
 if __name__ == '__main__':
-    te()
+    # te()
+    import torch
+
+    x1 = torch.randn(3, 4)
+    x2 = torch.randn(3, 4)
+    similarity = torch.cosine_similarity(x1, x2, dim=1)
+    print(similarity)

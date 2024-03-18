@@ -44,8 +44,10 @@ class BuildModule(object):
         print(resume_path)
         config = torch.load(resume_path, map_location='cpu')
 
-        metric = config['metric']
-        model_state = config['model']
+        # metric = config['metric']
+        # model_state = config['model']
+        model_state = config
+        metric = 0
         self.modules.load_state_dict(model_state, strict=strict)
 
         return metric

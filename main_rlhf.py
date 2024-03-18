@@ -1,4 +1,5 @@
 import os
+import time
 
 import cv2
 import numpy as np
@@ -28,6 +29,7 @@ from data.transforms.image.lmdb_image_decode import LmdbImageDecode
 from data.transforms.label.lmdb_stream_decode import LmdbStreamDecode
 from data.transforms.label.text_encode import TextEncode
 from models.losses.loss_fn.loss_proxy import CTCLossProxy
+from models.losses.loss_fn.rlhf_loss import RLHFLossProxy
 from models.metrics.decoder.text_decoder import TextDecoder
 from models.metrics.metric.rec_metric_paddle import RecMetric
 from models.modules.backbone.cnn.res_adapt import ResNet
@@ -42,18 +44,20 @@ def main():
     if torch.cuda.is_available():
         # 设置默认的 GPU 设备为第一个 GPU（设备索引为0）
         device = torch.device("cuda:0")
+        device1 = torch.device("cuda:0")
         print(f"Using GPU: {torch.cuda.get_device_name(0)}")
     else:
         # 如果没有可用的 GPU 设备，使用 CPU
         device = torch.device("cpu")
+        device1 = torch.device("cpu")
         print("No GPU available, using CPU.")
 
     data_root = r'/home/data/data_old/MJSynth'
 
     characters = [x.strip('\n') for x in open('vocab/word/synth_text_vocab', 'r', encoding='utf-8').readlines()]
-    characters = ['blank'] + charactor + ['end']
+    characters = ['blank'] + characters + ['end']
     max_length = 25
-    save_path = '/home/data/workspace/training_models/deep_learning/deep_learning_check_v2'
+    save_path = '/home/data/workspace/training_models/deep_learning/deep_learning_check'
     lr = 0.0005
     batch_size = 8
     split_step = 100
@@ -68,7 +72,7 @@ def main():
         data_root,
         [
             LmdbImageFilter(),
-            LmdbOutVocabFilter(charactor, max_length=max_length)
+            LmdbOutVocabFilter(characters, max_length=max_length)
         ],
         recache=False
     )
@@ -105,11 +109,11 @@ def main():
         EncoderWithRNN(512, 512 // 2),
         CTC(512, len(characters))
     ]
-    model = BuildModule(modules, save_path)
+    model = CRNN(3, 512, 512, len(characters), save_path)
     model.to(device)
 
-    base_model = BuildModule(modules, save_path)
-    base_model.to(device)
+    base_model = CRNN(3, 512, 512, len(characters), save_path)
+    base_model.to(device1)
     base_model.resume_model(os.path.join(save_path, 'latest.pth'))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.99),
@@ -119,7 +123,7 @@ def main():
     scheduler = Warmup(base_lr=base_lr, warm=10000)
     optimizer_with_scheduler = OptimizerWithScheduler(optimizer=optimizer, scheduler=scheduler)
 
-    criterion = CTCLossProxy(zero_infinity=True)
+    criterion = RLHFLossProxy(0.5)
 
     metric = RecMetric()
     decoder = TextDecoder(characters)
@@ -134,13 +138,12 @@ def main():
             texts, lengths = labels
             images = images.to(device)
             texts = texts.to(device)
-            lengths = lengths.to(device)
 
             preds = model(images)
             with torch.no_grad():
-                base_pred = base_model(images)
+                base_pred = base_model(images.to(device1)).to(device)
 
-            loss = criterion(preds, [texts, lengths])
+            loss, radio = criterion(preds, base_pred)
             optimizer_with_scheduler.zero_grad()
             loss.backward()
             curr_lr = optimizer_with_scheduler.step()
@@ -155,11 +158,13 @@ def main():
                 curr_lr = np.round(curr_lr, 7)
                 loss_v = np.round(float(loss_v) / print_step, 5)
                 acc = metric.get_metric()
-                bar.set_postfix_str(f'{index},{curr_lr},{loss_v},{acc}')
+                bar.set_postfix_str(f'{index},{curr_lr},{radio},{acc}')
                 metric.reset()
                 loss_v = 0
             if index % eval_step == 0:
-                torch.save(model.state_dict(), os.path.join(save_path, 'latest.pth'))
+                torch.save(model.state_dict(), os.path.join(save_path, 'latest_v1.pth'))
+
+            time.sleep(0.2)
 
 
 if __name__ == '__main__':
