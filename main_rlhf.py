@@ -52,12 +52,12 @@ def main():
         device1 = torch.device("cpu")
         print("No GPU available, using CPU.")
 
-    data_root = r'/home/data/data_old/MJSynth'
+    data_root = r'/home/liuwei/workspace/data/MJSynth'
+    save_path = '/home/liuwei/workspace/code/deep_learning_check_v2'
 
     characters = [x.strip('\n') for x in open('vocab/word/synth_text_vocab', 'r', encoding='utf-8').readlines()]
     characters = ['blank'] + characters + ['end']
     max_length = 25
-    save_path = '/home/data/workspace/training_models/deep_learning/deep_learning_check'
     lr = 0.0005
     batch_size = 8
     split_step = 100
@@ -111,14 +111,16 @@ def main():
     ]
     model = CRNN(3, 512, 512, len(characters), save_path)
     model.to(device)
+    model.resume_model(os.path.join(save_path, 'latest.pth'))
 
     base_model = CRNN(3, 512, 512, len(characters), save_path)
     base_model.to(device1)
     base_model.resume_model(os.path.join(save_path, 'latest.pth'))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.99),
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.99),
+    #                              weight_decay=0.00004)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9,
                                  weight_decay=0.00004)
-
     base_lr = [group['lr'] for group in optimizer.param_groups]
     scheduler = Warmup(base_lr=base_lr, warm=10000)
     optimizer_with_scheduler = OptimizerWithScheduler(optimizer=optimizer, scheduler=scheduler)
@@ -144,27 +146,25 @@ def main():
                 base_pred = base_model(images.to(device1)).to(device)
 
             loss, radio = criterion(preds, base_pred)
+
             optimizer_with_scheduler.zero_grad()
             loss.backward()
             curr_lr = optimizer_with_scheduler.step()
-
             _, pred_indices = preds.max(dim=2)
             preds, labels = decoder(pred_indices), decoder(texts)
             metric(preds, labels)
 
-            loss_v += loss
+            loss_v += radio
             index += 1
             if index % print_step == 0:
                 curr_lr = np.round(curr_lr, 7)
-                loss_v = np.round(float(loss_v) / print_step, 5)
+                radio = np.round(float(loss_v) / print_step, 5)
                 acc = metric.get_metric()
-                bar.set_postfix_str(f'{index},{curr_lr},{radio},{acc}')
+                bar.set_postfix_str(f'{index},{radio},{acc}')
                 metric.reset()
                 loss_v = 0
             if index % eval_step == 0:
                 torch.save(model.state_dict(), os.path.join(save_path, 'latest_v1.pth'))
-
-            time.sleep(0.2)
 
 
 if __name__ == '__main__':
