@@ -1,3 +1,5 @@
+from typing import Union
+
 import math
 import os.path
 
@@ -62,11 +64,17 @@ def te():
     print(x.grad)
 
 
-if __name__ == '__main__':
-    # te()
-    import torch
+def tt(data: Union[str, int] = None):
+    print(data)
+    return 0
 
-    x1 = torch.randn(3, 4)
-    x2 = torch.randn(3, 4)
-    similarity = torch.cosine_similarity(x1, x2, dim=1)
-    print(similarity)
+
+if __name__ == '__main__':
+# te()
+# import torch
+#
+# x1 = torch.randn(3, 4)
+# x2 = torch.randn(3, 4)
+# similarity = torch.cosine_similarity(x1, x2, dim=1)
+# print(similarity)
+    tt()

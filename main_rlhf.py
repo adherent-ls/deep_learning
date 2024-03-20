@@ -38,7 +38,7 @@ from models.modules.neck.rnn.bilstm_paddle import EncoderWithRNN
 from models.networks.CRNN import CRNN
 from models.optimizers.lr_scheduler.warm_up import Warmup
 from models.optimizers.optimizer_with_scheduler import OptimizerWithScheduler
-
+from torch.nn import functional
 
 def main():
     if torch.cuda.is_available():
